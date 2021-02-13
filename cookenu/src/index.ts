@@ -1,23 +1,15 @@
 import express from "express"
 import cors from "cors"
 import {AddressInfo} from "net"
-import { signUp } from "./endpoints/signUp"
-import { login } from "./endpoints/login"
-import { getOwnProfile } from "./endpoints/getOwnProfile"
-import { getProfileById } from "./endpoints/getProfileById"
-import { insertRecipe } from "./endpoints/insertRecipe"
-import { searchRecipesById } from "./endpoints/searchRecipesById"
+import { userRouter } from "./controller/routes/userRouter"
+import { recipeRouter } from "./controller/routes/recipesRouter"
 
 const app = express()
 app.use(express.json())
 app.use(cors())
 
-app.post("/signup",signUp)
-app.post("/login",login)
-app.get("/user/profile",getOwnProfile)
-app.get("/user/:id",getProfileById)
-app.post("/recipe",insertRecipe)
-app.get("/recipe/:id",searchRecipesById)
+app.use("/users",userRouter)
+app.use("/recipes",recipeRouter)
 
 const server = app.listen(process.env.PORT || 3003, ()=>{
     if(server){
