@@ -1,6 +1,7 @@
 import { Request, Response } from "express"
-import { signupInputDTO } from "../business/entities/user"
-import { businessLogin, businessSignup } from "../business/userBusiness"
+import { authenticationData, signupInputDTO } from "../business/entities/user"
+import { getTokenData } from "../business/services/authenticator"
+import { businessGetProfile, businessLogin, businessSignup } from "../business/userBusiness"
 
 let errorCode: number = 400
 
@@ -41,5 +42,48 @@ export const login = async(
     }
     catch(error){
         res.status(errorCode).send(error.message)
+    }
+}
+
+export const getOwnProfile = async(
+    req: Request,
+    res: Response
+):Promise<void> =>{
+    try{
+        const { authorization } = req.headers
+        const verifyToken: authenticationData = getTokenData(authorization as string)
+        const findUser = await businessGetProfile(verifyToken.id,authorization as string)
+
+        const profile = {
+            id:findUser.id,
+            name:findUser.name,
+            email:findUser.email
+        }
+        res.status(200).send({User:profile})
+    }
+    catch(error){
+        res.status(400).send({message:error.message})
+    }
+}
+
+export const getProfileById = async(
+    req:Request,
+    res:Response
+):Promise<void> =>{
+    try{
+        const { authorization } = req.headers
+        const { id } = req.params
+        const findUser = await businessGetProfile(id,authorization as string)
+
+        const profile = {
+            id: findUser.id,
+            name: findUser.name,
+            email: findUser.email
+        }
+
+        res.status(200).send({Profile: profile})
+    }
+    catch(error){
+        res.status(400).send({message:error.message})
     }
 }

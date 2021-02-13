@@ -1,6 +1,6 @@
-import { insertUser, selectUserByEmail } from "../data/userDataBase";
-import { generateToken } from "./services/authenticator";
-import { loginInput, signupInputDTO, user } from "./entities/user";
+import { insertUser, selectUserByEmail, selectUserById } from "../data/userDataBase";
+import { generateToken, getTokenData } from "./services/authenticator";
+import { authenticationData, loginInput, signupInputDTO, user } from "./entities/user";
 import { compareHash, generateHash } from "./services/hashManager";
 import { generateId } from "./services/idGenerator"
 
@@ -51,4 +51,25 @@ export const businessLogin = async(
 
     const token: string = generateToken({id:user.id})
     return token
+}
+
+export const businessGetProfile = async(
+    id:string,
+    authorization: string
+):Promise<any> =>{
+    if(!authorization){
+        throw new Error("You must pass an authentication in headers")
+    }
+
+    const verifyToken:authenticationData = await getTokenData(authorization as string)
+        if(!verifyToken){            
+            throw new Error("You must be logged in to search a profile")
+        }
+        
+    const user = await selectUserById(id)
+    if(!user){
+        throw new Error("User not found")
+    }
+    
+    return user
 }

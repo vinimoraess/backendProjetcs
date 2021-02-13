@@ -1,4 +1,4 @@
-import { Request, Response } from "express"
+/*import { Request, Response } from "express"
 import { createFollower } from "../data/createFollower"
 import { getUserById } from "../data/getUserById"
 import { getTokenData } from "../services/authenticator"
@@ -43,4 +43,4 @@ export const insertFollower = async(
            message:error.message
        })
     }
-}
+}*/
