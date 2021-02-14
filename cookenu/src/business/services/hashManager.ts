@@ -3,23 +3,22 @@ import dotenv from "dotenv"
 
 dotenv.config()
 
-export const generateHash = async(
-    plainText: string
-):Promise<string> =>{
+export class HashManager {
+    private rounds: number = Number(process.env.BCRYPT_COST)
+
+    public hash = async(
+        text:string
+    ):Promise<string>=>{
+        const salt: string = await bcrypt.genSalt(this.rounds)
+        const cypherText: string = await bcrypt.hash(text,salt)
     
-    const cost: number = Number(process.env.BCRYPT_COST)
-    const salt: string = await bcrypt.genSalt(cost)
-    const cypherText: string = await bcrypt.hash(plainText,salt)
+        return cypherText
+    }
 
-    return cypherText
-}
-
-export const compareHash = async(
-    plainText: string,
-    cypherText: string
-):Promise<boolean> =>{
-    
-    const result = bcrypt.compare(plainText,cypherText)
-
-    return result
+    public compare = async(
+        text: string,
+        hash: string
+    ):Promise<boolean>=>{
+        return bcrypt.compare(text,hash)
+    }
 }

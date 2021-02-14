@@ -1,31 +1,31 @@
 import * as jwt from "jsonwebtoken"
 import dotenv from "dotenv"
-import { authenticationData } from "../entities/user"
+import { authenticationData } from "../entities/User"
 
 dotenv.config()
 
-export const generateToken = (
-    payload: authenticationData
-):string =>{
+export class Authenticator {
 
-    const token: string = jwt.sign(
-        payload,
-        process.env.JWT_KEY as string,
-        {expiresIn: process.env.JWT_EXPIRE_TIME as string || "5h"}
-    )
-    return token
-}
-
-export const getTokenData = (
-    token: string
-):authenticationData =>{
+    public generateToken = async(
+        input: authenticationData,
+        expiresIn: string = "1d"
+    ):Promise<string>=>{
+        const token = jwt.sign(
+            input,
+            process.env.JWT_KEY as string,
+            {expiresIn}
+        )
+        return token
+    }
     
-    const payload = jwt.verify(
-        token,
-        process.env.JWT_KEY as string
-    ) as any
-
-    const result = {id: payload.id}
-
-    return result
+    public getTokenData = async(
+        token: string
+    ):Promise<authenticationData> =>{
+        const payload = jwt.verify(
+            token,
+            process.env.JWT_KEY as string
+        ) as any
+        const result = { id: payload.id }
+        return result
+    }
 }

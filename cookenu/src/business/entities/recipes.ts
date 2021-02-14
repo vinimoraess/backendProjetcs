@@ -1,12 +1,14 @@
-export type recipes = {
-    id: string,
-    title:string,
-    description: string,
-    createdAt: string,
-    user_id: string
+export class Recipes {
+    constructor(
+        public readonly id: string,
+        public readonly title:string,
+        public readonly description: string,
+        public readonly createdAt: string,
+        public readonly user_id: string
+    ){}    
 }
 
-export type inputRecipesDTO = {
+export interface inputRecipesDTO {
     title:string,
     description:string
 }

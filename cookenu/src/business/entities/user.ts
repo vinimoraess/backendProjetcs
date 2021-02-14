@@ -1,20 +1,22 @@
-export type user = {
-    id: string,
-    name: string,
-    email:string,
-    password: string
+export class User {
+    constructor(
+        public readonly id: string,
+        public readonly name: string,
+        public readonly email:string,
+        public readonly password: string
+    ){}    
 }
 
-export type authenticationData = {
+export interface authenticationData {
     id:string
 }
 
-export type loginInput = {
+export interface loginInput {
     email:string,
     password: string
 }
 
-export type signupInputDTO = {
+export interface signupInputDTO {
     name: string,
     email:string,
     password: string 
