@@ -1,8 +1,8 @@
 import express from "express"
 import cors from "cors"
 import {AddressInfo} from "net"
-import { userRouter } from "./controller/routes/userRouter"
-import { recipeRouter } from "./controller/routes/recipesRouter"
+import { userRouter } from "./controller/routes/UserRouter"
+import { recipeRouter } from "./controller/routes/RecipesRouter"
 
 const app = express()
 app.use(express.json())

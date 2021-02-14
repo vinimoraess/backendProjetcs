@@ -1,9 +1,9 @@
 import express from "express"
-import { getOwnProfile, getProfileById, login, signup } from "../userController"
+import { UserController} from "../UserController"
 
 export const userRouter = express.Router()
-
-userRouter.post("/signup",signup)
-userRouter.post("/login",login)
-userRouter.get("/profile",getOwnProfile)
-userRouter.get("/profile/:id",getProfileById)
+const userController = new UserController()
+userRouter.post("/signup",userController.signup)
+userRouter.post("/login",userController.login)
+userRouter.get("/profile",userController.ownProfile)
+userRouter.get("/profile/:id",userController.getProfile)

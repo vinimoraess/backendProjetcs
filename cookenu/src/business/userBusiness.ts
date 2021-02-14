@@ -1,75 +1,100 @@
-import { insertUser, selectUserByEmail, selectUserById } from "../data/userDataBase";
-import { generateToken, getTokenData } from "./services/authenticator";
-import { authenticationData, loginInput, signupInputDTO, user } from "./entities/user";
-import { compareHash, generateHash } from "./services/hashManager";
-import { generateId } from "./services/idGenerator"
+import { UserDataBase } from "../data/UserDataBase"
+import { authenticationData, loginInput, signupInputDTO } from "./entities/User"
+import { CustomError } from "./error/CustomError"
+import { Authenticator } from "./services/Authenticator"
+import { HashManager } from "./services/HashManager"
+import { IdGenerator } from "./services/IdGenerator"
 
-export const businessSignup = async(
-    input: signupInputDTO
-):Promise<string> =>{
-    if(!input.name || !input.email || !input.password){        
-        throw new Error(`Fill all the fields, name, email and password corretly`)
-    }
+export class UserBusiness{
 
-    const id: string = generateId()
-    const cypherPassword = await generateHash(input.password)
-    const user = {
-        id,
-        name: input.name,
-        email: input.email,
-        password: cypherPassword
-    }
+    constructor(
+        private idGenerator: IdGenerator,
+        private hashManager: HashManager,
+        public authenticator: Authenticator,
+        private userDataBase: UserDataBase
+    ){}
 
-    await insertUser(user)
+    public createUser = async(
+        user: signupInputDTO
+    ):Promise<string> =>{
+        if(!user.name || !user.email || !user.password){        
+            throw new CustomError(204,`Fill all the fields, name, email and password corretly`)
+        }
 
-    const token: string = generateToken({id})
-
-    return token
-
-}
-
-export const businessLogin = async(
-    input: loginInput
-):Promise<string> =>{
+        if (!user.email.includes("@")) {
+            throw new CustomError (404, "Invalid email")
+        }
     
-    if(!input.email || !input.password){
-        throw new Error(" 'email' and 'password' must be provided")
+        if (user.password.length<6) {
+            throw new CustomError (411, "Enter at least 6 characters")
+        }
+
+        const id: string = this.idGenerator.generate()
+        const hashPassword = await this.hashManager.hash(user.password)
+        const input ={
+            id,
+            name:user.name,
+            email:user.email,
+            password:hashPassword
+        }
+        await this.userDataBase.insertUser(input)
+    
+        const accessToken = this.authenticator.generateToken({id})
+    
+        return accessToken
+    
     }
-
-    const user: user = await selectUserByEmail(input.email)
-    if(!user){
-        throw new Error('User not found')
-    }
-
-    const checkPassword: boolean = await compareHash(
-        input.password,
-        user.password
-    )
-    if(!checkPassword){
-        throw new Error('Invalid Password')
-    }
-
-    const token: string = generateToken({id:user.id})
-    return token
-}
-
-export const businessGetProfile = async(
-    id:string,
-    authorization: string
-):Promise<any> =>{
-    if(!authorization){
-        throw new Error("You must pass an authentication in headers")
-    }
-
-    const verifyToken:authenticationData = await getTokenData(authorization as string)
+      
+    public getUserById = async(
+        id:string,
+        authorization: string
+    ):Promise<any> =>{
+        if(!authorization){
+            throw new CustomError(406,"You must pass an authentication in headers")
+        }
+    
+        const verifyToken:authenticationData = await this.authenticator.getTokenData(
+            authorization as string
+        )
+        
         if(!verifyToken){            
-            throw new Error("You must be logged in to search a profile")
+            throw new CustomError(406,"Invalid Credentials")
+        }
+    
+        const user = await this.userDataBase.selectUserById(id)
+        if(!user){
+            throw new CustomError(404,"User not found")
         }
         
-    const user = await selectUserById(id)
-    if(!user){
-        throw new Error("User not found")
+        return user
     }
-    
-    return user
+
+    public getUserByEmail = async(
+        user:loginInput
+    ):Promise<any>=>{
+        const userFromDB = await this.userDataBase.selectUserByEmail(user.email);
+
+        if (!userFromDB) {
+            throw new CustomError (406, "Invalid credentials")
+        }
+
+        if (!user.email || !user.password) {
+            throw new CustomError (404, "Enter email and password")
+        }
+
+      const passwordIsCorrect = await this.hashManager.compare(
+         user.password,
+         userFromDB.password
+      )
+
+      const accessToken = this.authenticator.generateToken({
+         id: userFromDB.id         
+      })
+
+      if (!passwordIsCorrect) {
+         throw new CustomError(401, "Invalid password!");
+      }
+
+      return accessToken;
+    }
 }
