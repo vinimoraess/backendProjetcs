@@ -1,8 +1,6 @@
 # LabenuSystem:
 
-### Integrantes
-* Isabela Rocha Silveira
-* Lilian Nicolau
+### Author
 * Vinicius Silveira Moraes
 
 ### Querys de criação de tabelas

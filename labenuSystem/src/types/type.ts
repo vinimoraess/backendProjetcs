@@ -14,7 +14,7 @@ export type teacher = {
     mission_id:number
 }
 
-export type mission = {
+export type mission={
     id: number,
     name: string,
     start_date: Date,
