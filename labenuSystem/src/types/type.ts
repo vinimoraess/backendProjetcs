@@ -4,7 +4,7 @@ export type student = {
     email:string,
     birthdate: Date,
     mission_id:number
-    a?:string
+    
 }
 
 export type teacher = {
